@@ -1,0 +1,113 @@
+Zip:
+  Mark J Krisburg:
+    Expression: |
+        (\d{5}) (?: \- (\d{4}) )?
+    Matches: 92078 | 92078-4705 | 92078-4705
+    Non-Matches: 9207 | 92078470 | 92078*4705
+    Description:
+      Zip Code (Zip or Zip-Plus4 format).
+      Accepts a hyphen, a space, or nothing between Zip and Plus4 segments.
+      may be used to reformat users input to desired format using Regex replace function (re.replace).
+    Groups:
+      - ZipCode
+      - ZipCodePlusFour
+
+State:
+  Michael Ash 71808:
+    Expression: |
+        (
+          a[lkszraep]|c[aot]|d[ec]|f[lm]|g[au]|hi|i[adln]|
+          k[sy]|la|m[adehinopst]|n[cdehjmvy]|o[hkr]|p[arw]|
+          ri|s[cd]|t[nx]|ut|v[ait]|w[aivy]
+        )
+    Matches: AL | CA | AA
+    Non-Matches: New York | California
+    Description: The RE match U.S. state abbreviation used by the U.S. Post Office.
+    Groups:
+      - StateAbbrGroup
+
+City:
+  Chase City:
+    Expression: ([a-z\.\,?]+)
+    Matches: blahblahblahblah
+    Non-Matches: yo yo yo
+    Groups:
+      - CityName
+
+StreetType:
+    Semaphorecorp:
+      Expression: |
+          (
+            aly|alley|anx|annex|apt|apartment|arc|arcade|ave|avenue|bsmt|basement|
+            byu|bayou|bch|beach|bnd|bend|blf|bluff|btm|bottom|blvd|boulevard|
+            br|branch|brg|bridge|brk|brook|bldg|building|bg|burg|byp|bypass|
+            cp|camp|cyn|canyon|cpe|cape|cswy|causeway|ctr|center|cir|circle|
+            clfs|cliff|clfs|cliffs|clb|club|cor|corner|cors|corners|crse|course|
+            ct|court|cts|courts|cv|cove|crk|creek|cres|crescent|xing|crossing|dl|
+            dale|dm|dam|dept|department|dv|divide|dr|drive|est|estate|expy|
+            expressway|ext|extension|fls|falls|fry|ferry|fld|field|flds|fields|
+            flt|flat|fl|floor|frd|ford|frst|forest|frg|forge|frk|fork|frks|forks|
+            ft|fort|fwy|freeway|frnt|front|gdns|garden|gdns|gardens|gtwy|gateway|
+            gln|glen|grn|green|grv|grove|hngr|hanger|hbr|harbor|hvn|haven|hts|heights|
+            hwy|highway|hl|hill|hls|hills|holw|hollow|inlt|inlet|is|island|iss|islands|
+            jct|junction|ky|key|knls|knoll|knls|knolls|lk|lake|lks|lakes|lndg|landing|ln|
+            lane|lgt|light|lf|loaf|lbby|lobby|lcks|lock|lcks|locks|ldg|lodge|lowr|lower|mnr|
+            manor|mdws|meadow|mdws|meadows|ml|mill|mls|mills|msn|mission|mt|mount|mtn|mountain|
+            nck|neck|ofc|office|orch|orchard|pkwy|parkway|ph|penthouse|pnes|pine|pnes|pines|pl|
+            place|pln|plain|plns|plains|plz|plaza|pt|point|prt|port|pr|prairie|radl|radial|rnch|
+            ranch|rpds|rapid|rpds|rapids|rst|rest|rdg|ridge|riv|river|rd|road|rm|room|shl|shoal|
+            shls|shoals|shr|shore|shrs|shores|spc|space|spg|spring|spgs|springs|sq|square|sta|station|
+            stra|stravenue|strm|stream|st|street|ste|suite|smt|summit|ter|terrace|trce|trace|trak|
+            track|trfy|trafficway|trl|trail|trlr|trailer|tunl|tunnel|tpke|turnpike|un|union|uppr|
+            upper|vly|valley|via|viaduct|vw|view|vlg|village|vl|ville|vis|vista|way|way|wls|well|wls|wells
+          )\.?
+      Matches: RD | STRM | WAY
+      Non-Matches: Oregon | California
+      Description: Matches Rd abbreviations
+      Groups:
+        - StreetTypeGroup
+
+StreetDirection:
+  Metrogis:
+      Expression: (n\.?[we]?|s\.?[we]?|e|w)\.?
+      Matches: N | NE | E | W
+      Non-Matches: QW | S W
+      Description: Matches USPS street direction standard abbreviations
+      Groups:
+        - StreetDirection
+
+  Chase FullDirection:
+      Expression: (west|east|north|south)
+      Matches: West | East | North | South
+      Non-Matches: Westr | Easter
+      Description: Matches USPS street directions
+      Groups:
+        - StreetDirection
+
+StreetNumber:
+  Chase StreetNumber:
+    Expression: ([0-9]{1,8})
+    Groups:
+      - StreetNum
+
+UnitLetter:
+  Chase UnitLetter:
+    Expression: ([a-z])
+    Groups:
+      - UnitLetterGroup
+
+StreetName:
+  Chase StreetName:
+    Expression: ([a-z\.]+)
+    Groups:
+      - StreetNameGroup
+
+  Chase StreetNumberName:
+    Expression: ([0-9]{1,4}(?:st|th|nd|rd))
+    Groups:
+      - StreetNameGroup
+
+  Chase HighwayNumber:
+    Expression: ((?:Route|Highway|I\-)\s?[0-9]{1,3})
+    Groups:
+      - StreetNameGroup

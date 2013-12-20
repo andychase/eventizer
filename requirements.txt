@@ -1,0 +1,6 @@
+pycurl
+beautifulsoup4
+regex
+icalendar
+pipeless
+gevent

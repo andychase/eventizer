@@ -1,0 +1,10 @@
+*.pyc
+.idea/*
+err/e_*
+log
+out*
+db/*.db
+err/err
+.hg/*
+.hgignore
+endpoint

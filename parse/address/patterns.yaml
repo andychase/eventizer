@@ -1,0 +1,56 @@
+# Use the smaller bits of regex to build dynamic regex patterns #
+# ns: ordinal Number Suffix such as rd th etc. as in 3rd, 4th
+
+BasicAddress:
+  Pattern: |
+    \#?
+    <StreetNumber> (?:<UnitLetter>)?
+    \s+
+    (?:<StreetDirection>\s+)?
+    (?:<StreetName>\s+)
+    (?:<StreetType>\s+)?
+    (?:<City>\s+)?
+    (?:<State>)?
+    (?:<Zip>)?
+  Matches: 3186 PILOT KNOB RD MN 55406
+  Description: |
+    From http://www.metrogis.org/data/standards/address_guidelines.shtml
+    1. Street number. (3186 PILOT KNOB RD)
+      The street number is typically an integer value,
+      but it may also include alpha characters, (e.g., 142A or 216 1/2).
+      How these addresses will be located depends upon your geocoding software.
+    2. Prefix direction. (156 E 18TH ST)
+      The location of a direction designation may vary within an address.
+      USPS street direction standard abbreviations: N, S, E, W, NE, SE, NW, SW
+      (e.g., N 1ST AVE or 1ST AVE N).
+    3. Street name. (3334 CEDAR AVE)
+      In some cases streets may be known by more than one name.
+      In these cases an alias or cross reference may be needed.
+      Streets with numeric names may need to be entered as 1ST ST rather than FIRST ST.
+    4. Street type. (3334 CEDAR AVE)
+      Street types need to be entered using USPS recommended abbreviations.
+    5. Suffix direction. (1200 34TH ST W)
+    6. Unit Number (14955 GALAXIE AVE STE 300)
+      Some common unit designators are:
+      APT (Apartment), STE (Suite), DEPT (Department), and the # sign.
+    7. City (MINNEAPOLIS MN 55406)
+      Spell city names in their entirety when possible.
+      13 character abbreviations from the USPS City State File.
+    8. State (MINNEAPOLIS MN 55406)
+      Use 2 letter USPS State Abbreviations.
+    9. Zip Code (MINNEAPOLIS MN 55406)
+      Zip Code or Zip+4 Number
+
+
+CrossStreet:
+  Pattern: |
+    \#?
+    <StreetName> \s+
+    (\&|and) \s+
+    <StreetName>\s+
+    (?:<StreetType>\.?\s+)?
+    (?:<City>\s+)?
+    (?:<State>\s+)?
+    (?:<Zip>)?
+  Matches: 10th & Main Street  OR | 10th & Central Ave Coos Bay OR 97420
+  Description:

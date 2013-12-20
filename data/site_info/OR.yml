@@ -1,0 +1,85 @@
+wweek:
+  timezone: America/Los_Angeles
+  location: OR
+  baseurl: http://www.wweek.com/portland/events-0.0.0.0.0.1.5.s0.html
+  urlnosaveregex: /portland/events-.+
+  urlregex: /portland/event-[0-9]+-.+.html
+  html_hints:
+    name: .content .featR h1
+    venue_name: .content .info2 a
+    address: .content .info2
+    date: .content .info2 b
+    type: .featR .category a
+    description: .content .featR .description
+
+traveloregon:
+  timezone: America/Los_Angeles
+  location: OR
+  baseurl: http://traveloregon.com/see-do/events/listing/?posts_per_page=50
+  urlnosaveregex: /see-do/events/listing/page/[0-9]+/?
+  urlregex: /see-do/events/[a-z-]+/[a-z-]+-([0-9]+)?/?$
+  html_hints:
+    name: .page-header h1
+    venue_name:
+    address: .adr span
+    date: .date span span
+    type: .breadcrumb a:last
+    description: .cms p
+  cleaners:
+    type:
+      - ^see \& do events
+      - events$
+    address: "[0-9]{3}-[0-9]{3}-[0-9]{4}"
+    description: >
+       Travel Oregon makes every effort
+       to provide accurate information to
+       make your visit to Oregon enjoyable\.
+       However event prices and times may
+       change without notice\. Please
+       call ahead for the most up-to-date information\.
+
+oregonfestivals:
+  steps: |
+    baseurl = 'http://oregonfestivals.memberzone.com/events'
+    cat_url = baseurl + '/?c={}'
+    html = get('http://oregonfestivals.memberzone.com/events')
+    soup = parse(html)
+    categories = soup.select('.mn-form-dropdown option')
+    categories = [(item.get('value'), item.decode_contents()) for item in categories if item.get('value')]
+    for category_number, category in categories:
+        scrape(cat_url.format(category_number), type=category)
+  urlnosaveregex: a^
+  urlregex: /events/details/
+  timezone: America/Los_Angeles
+  location: OR
+  html_hints:
+    name: .mn-event-name .mn-event-content
+    venue_name:
+    address: .mn-event-location .mn-event-content
+    date: .mn-event-hours .mn-event-content
+    description: .mn-event-desc .mn-event-content
+
+travelsalem:
+  timezone: America/Los_Angeles
+  location: OR
+  baseurl: http://www.travelsalem.com/Events/Event-Calendar
+  urlnosaveregex: a^
+  urlregex: /event/[a-zA-Z0-9-]+$
+  html_hints:
+    name: "#content-header h1"
+    venue_name:
+    address:
+    date: .date-display-start
+    date_end: .date-display-end
+    description: "#content .content p"
+
+visit corvallis:
+  timezone: America/Los_Angeles
+  location: OR
+  baseurl: "file:///C:/Users/a5c/Desktop/proj/1f/eventizer/data/download"
+  crawl: save_only
+  scrape: ical | html
+  cleaners:
+     address: "[ a-zA-Z0-9!.,]+@"
+  html_hints:
+     description: p

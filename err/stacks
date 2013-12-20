@@ -1,0 +1,1 @@
+python stacks.py && cat err | less
