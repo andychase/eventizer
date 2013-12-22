@@ -1,12 +1,14 @@
 import glob
-import yaml
 import json
+
+import yaml
+
 
 stacks = set()
 
 for file in glob.glob("./e_*"):
     with open(file, "r") as f:
-        try: 
+        try:
             doc = json.load(f)
         except:
             pass

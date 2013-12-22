@@ -1,12 +1,19 @@
+""" Eventizer """
 import pipeless
-from common import unicode_to_whitespace, export_exception
+
+from common import unicode_to_whitespace
 from data import get_site_list
 
 # Options
 untitled_event_name = 'Untitled Event'
-offline = False  # <- Operate in a mode that doesn't hit internet
+offline = False
 # Setup
-function, run, _ = pipeless.pipeline()  # export_exception
+
+
+def error_func(_, exception):
+    print exception
+    return None
+function, run, _ = pipeless.pipeline(use_builders=True, error_func=error_func)
 command, cli = pipeless.commandline(__doc__)
 
 
@@ -35,35 +42,26 @@ def test():
 
 # Output ----------------------------------------------------------------------------------------------------------
 def crawl():
-    from grab.crawler import site_map
-    site_map(get_site_list().values())
+    from grab.crawler import add_site, get_items
 
-    for crawling_session in site_map(get_site_list().values()):
-        for item in crawling_session:
-            yield item
+    for site_info in get_site_list().values():
+        add_site(site_info)
+
+    for item in get_items():
+        yield item
 
 
 @function('output')
 def scrape():
-    from output.scraper import scrape as html_scraper
-    from output.ical import ical_scraper
+    from output.scraper import scrape
     site_list = get_site_list()
 
     def func(event):
         if offline:
-            # Refresh site list because crawling sometimes gets cached for testing
-            if event.site_info['name'] in site_list:
-                event = event._replace(site_info=site_list[event.site_info['name']])
-
-        if event.site_info.get('scrape', '') == 'ical | html':
-            for ical_result in ical_scraper(event.html, event.site_info):
-                html_result = html_scraper(ical_result['raw']['description'], event.site_info)
-                ical_result['raw'].update(html_result['raw'])
-                url = ical_result['raw'].get('url', '')
-                yield event._replace(html="", url=url, **ical_result)
-        else:
-            data = html_scraper(event.html, event.site_info)
-            yield event._replace(html="", **data)
+            # Refresh site list
+            event = event._replace(site_info=site_list[event.site_info['name']])
+        data = scrape(event.html, event.site_info)
+        return event._replace(html="", **data)
 
     return func
 
@@ -270,8 +268,8 @@ def search():
 
     try:
         with open("endpoint", "r") as f:
-            endoint_url = f.read().trim()
-    except:
+            endoint_url = f.read().strip()
+    except IOError:
         print "Error getting endpoint url"
 
     def fix_id(event_dict):

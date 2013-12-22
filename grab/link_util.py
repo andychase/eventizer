@@ -10,7 +10,7 @@ def should_save_html(url, needed):
     return bool(needed.match(urlparse.urlparse(url).path))
 
 
-def should_download_link(link, crawl_only, needed, test_fn):
+def should_download_link(link, crawl_only, needed, in_crawled_urls):
     r"""
     >>> import re
     >>> r = lambda regex: re.compile(regex)
@@ -25,7 +25,7 @@ def should_download_link(link, crawl_only, needed, test_fn):
         link_parts = urlparse.urlparse(link)
         link = link_parts.scheme + "://" + link_parts.netloc + link_parts.path
         matching = bool(crawl_only.match(link_parts.path) or needed.match(link_parts.path))
-        return matching and valid_scheme(link_parts.scheme) and test_fn(link)
+        return matching and valid_scheme(link_parts.scheme) and not in_crawled_urls(link)
 
 
 def fix_link(link, url):

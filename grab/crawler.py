@@ -4,7 +4,7 @@ from time import time
 import bs4
 from gevent import sleep, monkey, queue
 from gevent import pool as gevent_pool
-from common import event, export_exception
+from common import event
 from link_util import should_download_link, fix_link, should_save_html
 
 monkey.patch_all()
@@ -18,12 +18,15 @@ test_html = {'404': "<html>\n</html>"}
 # Setup
 pool = gevent_pool.Pool(20000)
 events_retrieved = queue.Queue()
+
 website_lasthit_time = {}
+
 crawled_urls = {}
+
 parse = lambda html: bs4.BeautifulSoup(html, "html5lib")
 
 
-def add_crawled_url(site_name, url):
+def add_crawled_urls(site_name, url):
     crawled_urls.setdefault(site_name, []).append(url)
 
 in_crawled_urls = lambda site_name, url: url in crawled_urls.get(site_name, [])
@@ -50,11 +53,7 @@ def run_steps(steps, site_name, site_info):
 def prepare(site_info, test=False):
     site_name = site_info.get('name', '*')
     steps = site_info.get('steps', '')
-    if site_info.get('crawl', '') == 'save_only':
-        url = site_info['baseurl']
-        data = download_rate_limited(site_name, url, test)
-        yield event(url=url, site_info=site_info, html=data, sources=[site_name])
-    elif steps:
+    if steps:
         run_steps(steps, site_name, site_info)
     else:
         crawl_only = re.compile(site_info['urlnosaveregex'])
@@ -78,28 +77,29 @@ def crawl(url, site_info, site_name, crawl_only, needed, depth, test=False):
     >>> [(t.url, t.html) for t in get_items()]
     [('http://example.org/', '<html>\n</html>')]
     """
-    if depth < max_depth_to_parse:
-        html = download_rate_limited(site_name, url, test)
-        if html is not None:
+    if depth > max_depth_to_parse:
+        return
 
-            if should_save_html(url, needed):
-                yield event(url=url, site_info=site_info, html=html, sources=[site_name])
+    html = download_rate_limited(site_name, url, test)
+    if html is None:
+        return
 
-            add_crawled_url(site_name, url)
-            soup = parse(html)
+    if should_save_html(url, needed):
+        add_event(url=url, site_info=site_info, html=html, sources=[site_name])
 
-            # Find urls on page and elect them for processing
-            for link in get_links(url, soup):
-                if should_download_link(link, crawl_only, needed, lambda _url: not in_crawled_urls(site_name, _url)):
-                    add_link(
-                        url=link,
-                        site_info=site_info,
-                        site_name=site_name,
-                        crawl_only=crawl_only,
-                        needed=needed,
-                        depth=depth + 1,
-                        test=test
-                    )
+    add_crawled_urls(site_name, url)
+    soup = parse(html)
+
+    # Find urls on page and elect them for processing
+    for link in get_links(url, soup):
+        if should_download_link(link, crawl_only, needed, lambda url: in_crawled_urls(site_name, url)):
+            add_link(url=link,
+                     site_info=site_info,
+                     site_name=site_name,
+                     crawl_only=crawl_only,
+                     needed=needed,
+                     depth=depth + 1,
+                     test=test)
 
 
 def get_links(url, soup):
@@ -150,9 +150,21 @@ def in_range(num, high, low):
 
 
 # Async Functions
-def site_map(site_list, test=False):
-    for item in pool.imap_unordered(lambda site: prepare(site, test), site_list):
-        yield item
+def add_site(site, test=False):
+    pool.spawn(prepare, site, test)
 
 
 add_link = lambda *args, **kwargs: pool.spawn(crawl, *args, **kwargs)
+
+add_event = lambda **kwargs: events_retrieved.put(event(**kwargs))
+
+
+def get_items():
+    while True:
+        events_retrieved.put(StopIteration)
+        for item in events_retrieved:
+            yield item
+        pool.join(1)
+        if len(pool) == 0:
+            break
+

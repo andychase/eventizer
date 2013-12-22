@@ -60,7 +60,7 @@ tests = [
 ]
 
 
-class crawler_test(unittest.TestCase):
+class CrawlerTest(unittest.TestCase):
 
     def test_crawling(self):
         for test in tests:

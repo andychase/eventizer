@@ -72,14 +72,3 @@ travelsalem:
     date: .date-display-start
     date_end: .date-display-end
     description: "#content .content p"
-
-visit corvallis:
-  timezone: America/Los_Angeles
-  location: OR
-  baseurl: "file:///C:/Users/a5c/Desktop/proj/1f/eventizer/data/download"
-  crawl: save_only
-  scrape: ical | html
-  cleaners:
-     address: "[ a-zA-Z0-9!.,]+@"
-  html_hints:
-     description: p
